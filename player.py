@@ -7,7 +7,8 @@ class Player(pygame.sprite.Sprite):
         self.image.fill("green");
         self.rect = self.image.get_rect(topleft = pos);
         self.direction = pygame.math.Vector2((0,0));
-        self.speed = 10;
+        self.baseSpeed = 10;
+        self.speed = self.baseSpeed;
     
     def getInput(self):
         keys = pygame.key.get_pressed();

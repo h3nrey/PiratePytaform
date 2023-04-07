@@ -1,6 +1,6 @@
-import pygame
+import pygame, math
 from tiles import Tile;
-from settings import tileSize;
+from settings import tileSize, screenW, camBorder;
 from player import Player;
 
 class Level:
@@ -23,6 +23,22 @@ class Level:
                     playerSpr = Player((x,y));
                     self.player.add(playerSpr);
     
+    def ScrollX(self):
+        player = self.player.sprite;
+        playerX = player.rect.centerx;
+        playerDir = player.direction.x;
+        
+        if(math.fabs(playerDir) > 0):
+            if(playerX < camBorder):
+                self.worldShift = player.baseSpeed;
+                player.speed = 0;
+            if(playerX > screenW - camBorder):
+                self.worldShift = -player.baseSpeed;
+                player.speed = 0;
+        else:
+            self.worldShift = 0;
+            player.speed = player.baseSpeed;
+
     def run(self):
         # Level Tiles
         self.tiles.update(self.worldShift);
@@ -31,3 +47,5 @@ class Level:
         # Player
         self.player.update();
         self.player.draw(self.displaySurf);
+
+        self.ScrollX();

@@ -14,3 +14,4 @@ levelMap = [
 tileSize = 64;
 screenW = 1200;
 screenH = len(levelMap) * tileSize;
+camBorder = 200;
