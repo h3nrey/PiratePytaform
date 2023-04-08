@@ -17,8 +17,14 @@ class Player(pygame.sprite.Sprite):
         self.speed = self.baseSpeed;
         self.gravity = 0.8;
         self.jumpForce = -16;
-    
+
+        # States
         self.state = "idle";
+        self.isFacingRight = True;
+        self.onGround = True;
+        self.onCeiling = False;
+        self.onRight = False;
+        self.onLeft = False;
     
     def importCharacterAssets(self):
         PATH = "./Graphics/Character/";
@@ -41,15 +47,29 @@ class Player(pygame.sprite.Sprite):
         if(self.frameIndex > len(animation)):
             self.frameIndex = 0;
 
-        self.image = animation[int(self.frameIndex)];
+        image = animation[int(self.frameIndex)];
+        if(self.isFacingRight):
+            self.image = image;
+        else:
+            flippedImage = pygame.transform.flip(image, True, False);
+            self.image = flippedImage;
+    
+        if(self.onGround):
+            self.rect = self.image.get_rect(midbottom = self.rect.midbottom);
+        elif self.onCeiling :
+            self.rect = self.image.get_rect(midtop = self.rect.midtop);
+        else: 
+            self.rect = self.image.get_rect(center = self.rect.center);
     
     def GetInput(self):
         keys = pygame.key.get_pressed();
         print("input");
         if keys[pygame.K_RIGHT]:
             self.direction.x = 1;
+            self.isFacingRight = True;
         elif keys[pygame.K_LEFT]:
             self.direction.x = -1;
+            self.isFacingRight = False;
         else:
             self.direction.x = 0;
     
