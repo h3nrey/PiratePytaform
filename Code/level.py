@@ -2,6 +2,7 @@ import pygame, math
 from tiles import Tile;
 from settings import tileSize, screenW, camBorder;
 from player import Player;
+from particles import ParticleEffect;
 
 class Level:
     def __init__(self, levelData, surface):
@@ -10,6 +11,26 @@ class Level:
         self.worldShift = 0;
         self.lastCollisionXPos = 0;
     
+        # Dust
+        self.dustSprite = pygame.sprite.GroupSingle();
+        self.playerOnGround = False;
+    
+    def CreateJumpParticles(self, pos):
+        if(self.player.sprite.isFacingRight):
+            pos -= pygame.math.Vector2(10,5);
+        else:
+            pos += pygame.math.Vector2(10, -5);
+        jumpParticleSprite = ParticleEffect(pos,"jump");
+        self.dustSprite.add(jumpParticleSprite);
+
+    def CreateLandingDust(self):
+        if(not self.playerOnGround and self.player.sprite.onGround and not self.dustSprite.sprites()):
+            if(self.player.sprite.isFacingRight):
+                offset  = pygame.math.Vector2(10,15);
+            else:
+                offset  = pygame.math.Vector2(-10,15);
+            fallDustParticle = ParticleEffect(self.player.sprite.rect.midbottom - offset, "land");
+            self.dustSprite.add(fallDustParticle);
     def setupLevel(self, layout):
         self.tiles = pygame.sprite.Group();
         self.player = pygame.sprite.GroupSingle();
@@ -21,7 +42,7 @@ class Level:
                     tile = Tile((x,y), tileSize)
                     self.tiles.add(tile);
                 if(cell == "P"):
-                    playerSpr = Player((x,y));
+                    playerSpr = Player((x,y), self.displaySurf, self.CreateJumpParticles);
                     self.player.add(playerSpr);
     
     def ScrollX(self):
@@ -40,6 +61,12 @@ class Level:
             self.worldShift = 0;
             player.speed = player.baseSpeed;
 
+    def GetPlayerOnGround(self):
+        if(self.player.sprite.onGround):
+            self.playerOnGround = True;
+        else:
+            self.playerOnGround = False;
+    
     def HorizontalMovementCollision(self):
         player = self.player.sprite;
         player.rect.x += player.direction.x * player.speed;
@@ -79,13 +106,19 @@ class Level:
         if(player.onCeiling and player.direction.y > 0):
             player.onCeiling = False;
     def run(self):
+        # Dust particles
+        self.dustSprite.update(self.worldShift);
+        self.dustSprite.draw(self.displaySurf);
+
         # Level Tiles
         self.tiles.update(self.worldShift);
         self.tiles.draw(self.displaySurf);
-        # self.ScrollX();
+        self.ScrollX();
 
         # Player
         self.player.update();
         self.HorizontalMovementCollision();
+        self.GetPlayerOnGround();
         self.VerticalMovementCollision();
+        self.CreateLandingDust();
         self.player.draw(self.displaySurf);

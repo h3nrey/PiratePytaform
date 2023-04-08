@@ -11,7 +11,7 @@ screen = pygame.display.set_mode((screenW, screenH));
 clock = pygame.time.Clock();
 FPS = 60;
 
-level = Level(levelMap, screen);
+level = Level(levelMap, screen); 
 
 while True:
     events = pygame.event.get();
