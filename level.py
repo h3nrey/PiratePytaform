@@ -39,13 +39,37 @@ class Level:
             self.worldShift = 0;
             player.speed = player.baseSpeed;
 
+    def HorizontalMovementCollision(self):
+        player = self.player.sprite;
+        player.rect.x += player.direction.x * player.speed;
+    
+        for sprite in self.tiles.sprites():
+            if(sprite.rect.colliderect(player.rect)):
+                if(player.direction.x < 0):
+                    player.rect.left = sprite.rect.right;
+                elif(player.direction.x > 0):
+                    player.rect.right = sprite.rect.left;
+    
+    def VerticalMovementCollision(self):
+        player = self.player.sprite;
+        player.ApplyGravity();
+    
+        for sprite in self.tiles.sprites():
+            if sprite.rect.colliderect(player.rect):
+                if(player.direction.y > 0):
+                    player.rect.bottom = sprite.rect.top;
+                    player.direction.y = 0;
+                elif(player.direction.y < 0):
+                    player.rect.top = sprite.rect.bottom;
+                    player.direction.y = 0;
     def run(self):
         # Level Tiles
         self.tiles.update(self.worldShift);
         self.tiles.draw(self.displaySurf);
+        self.ScrollX();
 
         # Player
         self.player.update();
+        self.HorizontalMovementCollision();
+        self.VerticalMovementCollision();
         self.player.draw(self.displaySurf);
-
-        self.ScrollX();
