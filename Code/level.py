@@ -8,7 +8,8 @@ class Level:
         self.displaySurf = surface;
         self.setupLevel(levelData);
         self.worldShift = 0;
-
+        self.lastCollisionXPos = 0;
+    
     def setupLevel(self, layout):
         self.tiles = pygame.sprite.Group();
         self.player = pygame.sprite.GroupSingle();
@@ -47,8 +48,17 @@ class Level:
             if(sprite.rect.colliderect(player.rect)):
                 if(player.direction.x < 0):
                     player.rect.left = sprite.rect.right;
+                    player.onLeft = True;
+                    self.lastCollisionXPos = player.rect.left;
                 elif(player.direction.x > 0):
                     player.rect.right = sprite.rect.left;
+                    player.onRight = True;
+                    self.lastCollisionXpos = player.rect.right;
+        
+        if(player.onLeft and (player.rect.left < self.lastCollisionXPos or player.direction.x >= 0)):
+            player.onLeft = False;
+        if(player.onRight and (player.rect.right > self.lastCollisionXPos or player.direction.x <= 0)):
+            player.onRight = False;
     
     def VerticalMovementCollision(self):
         player = self.player.sprite;
@@ -72,7 +82,7 @@ class Level:
         # Level Tiles
         self.tiles.update(self.worldShift);
         self.tiles.draw(self.displaySurf);
-        self.ScrollX();
+        # self.ScrollX();
 
         # Player
         self.player.update();
